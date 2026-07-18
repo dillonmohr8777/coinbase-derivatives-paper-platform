@@ -1,0 +1,26 @@
+# Copy to config/config.yaml. Watchlist + timeframes + providers are config-driven.
+watchlist:
+  crypto: [BTC/USDT, ETH/USDT, SOL/USDT]
+  equities: [AAPL, MSFT, NVDA, TSLA, COIN]
+
+timeframes: [1m, 5m, 1h, 1d]
+
+strategy:
+  active: strategy_v1
+  params:
+    fast_ma: 9
+    slow_ma: 21
+    min_volume_percentile: 40   # low-liquidity filter (spec §5)
+
+risk:
+  max_position_usd: 1000
+  max_concurrent_positions: 5
+  daily_loss_stop_usd: 500
+
+execution:
+  fee_bps: 10        # 0.10% per side, modeled in every fill
+  slippage_bps: 5
+
+radar:
+  correlation_window_hours: 48
+  min_signals_to_rank: 2   # need >=2 distinct alt-data signals to call it "positioning"

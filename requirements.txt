@@ -1,0 +1,24 @@
+# Core (v1). Pin exact versions at build time; these are the intended libraries.
+fastapi
+uvicorn[standard]
+pydantic>=2
+pydantic-settings
+pyyaml
+httpx
+python-dotenv
+jinja2
+
+# Data / trading (optional real adapters — fixtures work without them)
+# ccxt                 # crypto market data + testnet
+# alpaca-py            # equities market data + PAPER trading
+# sec-edgar-downloader # SEC filings (free)
+
+# LLM (provider-agnostic; install whichever you configure)
+# openai
+# anthropic
+
+# Dev
+pytest
+ruff
+black
+mypy

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+config/config.yaml
+whale_desk.sqlite
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
