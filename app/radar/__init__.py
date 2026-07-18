@@ -6,6 +6,7 @@ Each connector has a fixture impl so the sample prompt works with zero paid keys
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from math import log1p
 from typing import Protocol
 
 from app.types import AltSignal, WhaleReport, WhaleRow
@@ -65,10 +66,15 @@ class Radar:
 
         rows: list[WhaleRow] = []
         for sym, sigs in by_symbol.items():
+            newest = max(s.ts for s in sigs)
+            sigs = [
+                s for s in sigs
+                if abs((newest - s.ts).total_seconds()) <= self.window_hours * 3600
+            ]
             sources = {s.source for s in sigs}
             if len(sources) < self.min_signals:
                 continue
-            score = sum(s.magnitude for s in sigs) * len(sources)
+            score = sum(log1p(max(s.magnitude, 0)) for s in sigs) * len(sources)
             rows.append(WhaleRow(symbol=sym, score=score, signals=sigs))
 
         rows.sort(key=lambda r: r.score, reverse=True)

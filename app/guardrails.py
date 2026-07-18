@@ -51,5 +51,24 @@ def liquidity_ok(recent_volumes: list[float], current_volume: float, min_percent
     return current_volume >= threshold
 
 
-# TODO(codex): overfitting guard — compare in-sample vs out-of-sample metrics per strategy
-#              version and flag strategies that only work in-sample (spec §5.4).
+def overfitting_ok(
+    train_return: float,
+    validation_return: float,
+    *,
+    max_degradation: float = 0.70,
+) -> bool:
+    """Require positive held-out performance that does not collapse vs training."""
+    if train_return <= 0 or validation_return <= 0:
+        return False
+    return validation_return / train_return >= 1.0 - max_degradation
+
+
+def require_fresh_data(candles: list[Candle], now, max_age_seconds: float) -> None:
+    """Fail closed on missing, partial, unordered, or stale market data."""
+    if not candles:
+        raise GuardrailError("market data unavailable")
+    if any(b.ts <= a.ts for a, b in zip(candles, candles[1:])):
+        raise GuardrailError("market data is unordered or duplicated")
+    age = (now - candles[-1].ts).total_seconds()
+    if age < 0 or age > max_age_seconds:
+        raise GuardrailError("market data is stale")

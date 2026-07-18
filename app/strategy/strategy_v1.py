@@ -46,11 +46,14 @@ class StrategyV1(Strategy):
         if side is None:
             return []
 
+        max_position_usd = float(context.get("max_position_usd", 1000.0))
+        risk_fraction = float(context.get("signal_risk_fraction", 0.25))
+        size = max_position_usd * risk_fraction / last.close
         return [
             Signal(
                 symbol=last.symbol,
                 side=side,
-                size=1.0,   # TODO(codex): size from risk config, not a constant
+                size=size,
                 rationale=f"{self.fast}/{self.slow} MA cross {side.value} at {last.close:.2f}",
                 strategy_version=self.version,
                 ts=last.ts,

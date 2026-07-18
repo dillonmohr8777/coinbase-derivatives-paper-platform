@@ -9,6 +9,8 @@ from app.guardrails import (
     liquidity_ok,
     model_costs,
     no_lookahead,
+    overfitting_ok,
+    require_fresh_data,
 )
 from app.types import Candle, Side, Signal
 
@@ -47,3 +49,12 @@ def test_liquidity_filter_skips_low_volume():
     vols = [1000, 1100, 1200, 1300, 1400]
     assert liquidity_ok(vols, current_volume=1500, min_percentile=40) is True
     assert liquidity_ok(vols, current_volume=500, min_percentile=40) is False
+
+
+def test_overfitting_and_stale_data_guards():
+    assert overfitting_ok(0.20, 0.08)
+    assert not overfitting_ok(0.20, -0.01)
+    now = datetime(2026, 1, 1, 2, tzinfo=timezone.utc)
+    stale = [Candle("AAPL", "1h", now - timedelta(hours=2), 1, 1, 1, 1, 1)]
+    with pytest.raises(GuardrailError, match="stale"):
+        require_fresh_data(stale, now, max_age_seconds=3600)

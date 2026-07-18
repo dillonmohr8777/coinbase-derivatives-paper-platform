@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from hashlib import sha256
 from typing import Protocol
 
 from app.types import Candle
@@ -15,12 +16,13 @@ class FixtureProvider:
     """Deterministic synthetic candles so the whole system runs offline / keyless."""
 
     def get_candles(self, symbol: str, timeframe: str, limit: int = 200) -> list[Candle]:
-        base = 100.0 + (hash(symbol) % 50)
+        base = 100.0 + (int(sha256(symbol.encode()).hexdigest()[:8], 16) % 50)
         now = datetime(2026, 1, 1, tzinfo=timezone.utc)
         out: list[Candle] = []
         for i in range(limit):
-            drift = (i % 20) - 10          # gentle oscillation, deterministic
-            close = base + drift + (i * 0.05)
+            cycle = i % 48
+            drift = cycle * 0.45 if cycle < 24 else (48 - cycle) * 0.45
+            close = base + drift + (i * 0.025)
             out.append(
                 Candle(
                     symbol=symbol,

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 from app.data import get_provider
 from app.execution import get_broker
+from app.guardrails import GuardrailError, check_risk_limits
 from app.memory import get_memory
 from app.strategy import get_strategy
 from config.settings import get_settings, load_yaml_config
@@ -42,11 +43,24 @@ def main() -> None:
         prior = memory.search(symbol, limit=3)
         if prior:
             _log(f"{symbol}: recalled {len(prior)} prior lesson(s) from memory.")
-        signals = strat.generate_signals(candles, context={"memory": prior})
+        signals = strat.generate_signals(candles, context={
+            "memory": prior,
+            "max_position_usd": cfg["risk"]["max_position_usd"],
+        })
         if not signals:
             _log(f"{symbol}: no signal (or filtered by low-volume/guardrails).")
             continue
         for sig in signals:
+            try:
+                check_risk_limits(
+                    sig, candles[-1].close, open_positions=0, day_pnl=0,
+                    max_position_usd=cfg["risk"]["max_position_usd"],
+                    max_concurrent_positions=cfg["risk"]["max_concurrent_positions"],
+                    daily_loss_stop_usd=cfg["risk"]["daily_loss_stop_usd"],
+                )
+            except GuardrailError as exc:
+                _log(f"{symbol}: order blocked by guardrail: {exc}")
+                continue
             fill = broker.place_order(sig, candles[-1].close)
             _log(f"{strat.version.upper()} SIGNAL: {sig.side.value} {symbol} -> EXECUTING ORDER "
                  f"(paper) @ {fill.price:.2f} fee {fill.fee:.2f}")

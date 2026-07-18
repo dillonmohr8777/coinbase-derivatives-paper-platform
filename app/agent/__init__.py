@@ -6,6 +6,7 @@ tool-calling model drops in. A MockLLM ships so everything runs with no keys.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 from typing import Any, Callable, Protocol
 
 # --- Tool registry ("Skills") -------------------------------------------------
@@ -68,10 +69,37 @@ class Agent:
         self.tools = tools or get_tools()
 
     def run(self, task: str, max_steps: int = 6) -> AgentResult:
-        # TODO(codex): real loop — ask LLM, execute returned tool_calls against self.tools,
-        #              feed results back, repeat until done or max_steps. Append each step to
-        #              `log` (this becomes the dashboard run log). MockLLM returns no calls,
-        #              so this base impl just echoes.
-        out = self.llm.complete([{"role": "user", "content": task}])
-        return AgentResult(text=out["text"], tool_calls=out.get("tool_calls", []),
-                           log=[f"task: {task}", out["text"]])
+        messages = [{"role": "user", "content": task}]
+        log = [f"task: {task}"]
+        calls_seen: list[dict] = []
+        specs = [
+            {"name": t.name, "description": t.description, "parameters": t.schema}
+            for t in self.tools.values()
+        ]
+        final_text = ""
+        for _ in range(max_steps):
+            out = self.llm.complete(messages, tools=specs)
+            final_text = str(out.get("text", ""))
+            calls = out.get("tool_calls", [])
+            if final_text:
+                log.append(final_text)
+            if not calls:
+                break
+            messages.append({"role": "assistant", "content": final_text, "tool_calls": calls})
+            for call in calls:
+                name, args = call.get("name"), call.get("args", {})
+                if name not in self.tools:
+                    result: Any = {"error": f"unknown tool: {name}"}
+                else:
+                    try:
+                        result = self.tools[name].fn(**args)
+                    except Exception as exc:
+                        result = {"error": type(exc).__name__, "detail": str(exc)}
+                calls_seen.append(call)
+                log.append(f"tool:{name} -> {result}")
+                messages.append(
+                    {"role": "tool", "name": name, "content": json.dumps(result, default=str)}
+                )
+        else:
+            log.append(f"halted after max_steps={max_steps}")
+        return AgentResult(text=final_text, tool_calls=calls_seen, log=log)
