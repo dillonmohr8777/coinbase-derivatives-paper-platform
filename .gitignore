@@ -7,3 +7,4 @@ whale_desk.sqlite
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+logs/
