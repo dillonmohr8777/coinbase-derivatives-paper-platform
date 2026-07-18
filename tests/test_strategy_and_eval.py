@@ -1,4 +1,5 @@
 """Strategy + metrics tests (no network)."""
+
 from app.data import FixtureProvider
 from app.eval import compute_metrics
 from app.strategy import get_strategy

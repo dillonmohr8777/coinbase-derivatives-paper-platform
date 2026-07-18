@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     # Market data / broker
     market_data_provider: str = "fixture"
+    coinbase_public_base_url: str = "https://api.coinbase.com"
     alpaca_api_key: str = ""
     alpaca_secret_key: str = ""
     alpaca_paper_base_url: str = "https://paper-api.alpaca.markets"

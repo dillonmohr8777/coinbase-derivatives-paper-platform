@@ -7,6 +7,7 @@ timeframes: [1m, 5m, 1h, 1d]
 
 strategy:
   active: strategy_v1
+  derivatives_active: strategy_v2
   params:
     fast_ma: 9
     slow_ma: 21
@@ -20,6 +21,16 @@ risk:
 execution:
   fee_bps: 10        # 0.10% per side, modeled in every fill
   slippage_bps: 5
+
+derivatives:
+  # Coinbase Advanced Trade product ids; confirm against public discovery for your region.
+  products: [BTC-PERP-INTX, ETH-PERP-INTX, SOL-PERP-INTX]
+  timeframe: 5m
+
+paper:
+  starting_equity: 10000
+  max_leverage: 3
+  poll_seconds: 60
 
 radar:
   correlation_window_hours: 48

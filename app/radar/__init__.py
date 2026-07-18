@@ -3,6 +3,7 @@
 Prompt: 'Find me whale trades where institutions are positioning before the move.'
 Each connector has a fixture impl so the sample prompt works with zero paid keys.
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -21,7 +22,9 @@ class FixtureOptionsFlow:
         now = datetime(2026, 1, 2, tzinfo=timezone.utc)
         # Deterministic sample: unusual call sweep on the first two symbols.
         return [
-            AltSignal("options_flow", s, now, f"unusual call sweep on {s} (>$1M premium)", 1_200_000)
+            AltSignal(
+                "options_flow", s, now, f"unusual call sweep on {s} (>$1M premium)", 1_200_000
+            )
             for s in symbols[:2]
         ]
 
@@ -30,7 +33,9 @@ class FixtureDarkPool:
     def fetch(self, symbols: list[str]) -> list[AltSignal]:
         now = datetime(2026, 1, 2, tzinfo=timezone.utc)
         return [
-            AltSignal("dark_pool", s, now, f"large dark-pool print on {s} (block > 500k sh)", 5_000_000)
+            AltSignal(
+                "dark_pool", s, now, f"large dark-pool print on {s} (block > 500k sh)", 5_000_000
+            )
             for s in symbols[:2]
         ]
 
@@ -39,7 +44,9 @@ class FixtureSecFilings:
     def fetch(self, symbols: list[str]) -> list[AltSignal]:
         now = datetime(2026, 1, 2, tzinfo=timezone.utc)
         return [
-            AltSignal("sec_filing", symbols[0], now, f"Form 4 insider buy filed for {symbols[0]}", 800_000)
+            AltSignal(
+                "sec_filing", symbols[0], now, f"Form 4 insider buy filed for {symbols[0]}", 800_000
+            )
         ]
 
 
@@ -48,8 +55,9 @@ class FixtureSecFilings:
 
 
 class Radar:
-    def __init__(self, connectors: list[AltDataConnector], min_signals: int = 2,
-                 window_hours: int = 48) -> None:
+    def __init__(
+        self, connectors: list[AltDataConnector], min_signals: int = 2, window_hours: int = 48
+    ) -> None:
         self.connectors = connectors
         self.min_signals = min_signals
         self.window_hours = window_hours
@@ -68,8 +76,7 @@ class Radar:
         for sym, sigs in by_symbol.items():
             newest = max(s.ts for s in sigs)
             sigs = [
-                s for s in sigs
-                if abs((newest - s.ts).total_seconds()) <= self.window_hours * 3600
+                s for s in sigs if abs((newest - s.ts).total_seconds()) <= self.window_hours * 3600
             ]
             sources = {s.source for s in sigs}
             if len(sources) < self.min_signals:

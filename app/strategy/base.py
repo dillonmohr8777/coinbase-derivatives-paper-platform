@@ -1,4 +1,5 @@
 """Common strategy interface. Every version implements generate_signals()."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

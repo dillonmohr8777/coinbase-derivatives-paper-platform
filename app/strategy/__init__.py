@@ -1,11 +1,14 @@
 """Versioned strategies. Register each version; the active one is chosen by config."""
+
 from __future__ import annotations
 
 from app.strategy.base import Strategy
 from app.strategy.strategy_v1 import StrategyV1
+from app.strategy.strategy_v2 import StrategyV2
 
 _REGISTRY: dict[str, type[Strategy]] = {
     "strategy_v1": StrategyV1,
+    "strategy_v2": StrategyV2,
 }
 
 

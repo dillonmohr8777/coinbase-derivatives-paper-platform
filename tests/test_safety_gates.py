@@ -1,4 +1,5 @@
 """Safety-gate tests: v1 must never expose a live-order path by default."""
+
 from app.execution import PaperBroker, get_broker
 from config.settings import Settings
 

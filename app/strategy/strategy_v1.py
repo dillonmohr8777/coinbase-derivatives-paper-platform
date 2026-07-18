@@ -3,6 +3,7 @@
 Mirrors the source video's reference to a 'crossover loss during low-volume chop' — the volume
 filter is exactly the mitigation for that failure mode.
 """
+
 from __future__ import annotations
 
 from app.strategy.base import Strategy

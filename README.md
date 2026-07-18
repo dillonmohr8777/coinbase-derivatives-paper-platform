@@ -7,6 +7,13 @@ The current build is deliberately paper-only. Start the CLI with `make run`, the
 with `make dashboard`, the offline backtest with `make backtest STRAT=strategy_v1`, and the
 fixture whale scan with `make radar Q="Find me whale trades"`.
 
+For the Coinbase derivatives program, set `MARKET_DATA_PROVIDER=coinbase_public` and run
+`make paper`. This reads public perpetual prices and writes simulated positions only. See
+`OPERATIONS.md` for the daily review and `LIVE-READINESS.md` for the mandatory promotion gate.
+
+The complete Actions workflow is staged at `ci/whale-desk-ci.yml`. Copy it into
+`.github/workflows/` after the publishing credential has GitHub's `workflow` scope.
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt

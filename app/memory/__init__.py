@@ -3,6 +3,7 @@
 'Giving your bot memory' (16:03) + 'Building cloud memory' (17:48). The agent reads memory
 before acting and writes trades/outcomes/lessons after. Switching backends is config-only.
 """
+
 from __future__ import annotations
 
 import json
@@ -16,6 +17,7 @@ _DB = Path(__file__).resolve().parents[2] / "whale_desk.sqlite"
 class Memory(Protocol):
     def write(self, kind: str, record: dict) -> None: ...
     def search(self, query: str, limit: int = 10) -> list[dict]: ...
+    def list_kind(self, kind: str, limit: int = 100) -> list[dict]: ...
 
 
 class LocalMemory:
@@ -25,8 +27,12 @@ class LocalMemory:
         self.conn = sqlite3.connect(path)
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS memory "
-            "(id INTEGER PRIMARY KEY, kind TEXT, body TEXT)"
+            "(id INTEGER PRIMARY KEY, kind TEXT, body TEXT, "
+            "created_at TEXT DEFAULT CURRENT_TIMESTAMP)"
         )
+        columns = {row[1] for row in self.conn.execute("PRAGMA table_info(memory)")}
+        if "created_at" not in columns:
+            self.conn.execute("ALTER TABLE memory ADD COLUMN created_at TEXT")
         self.conn.commit()
 
     def write(self, kind: str, record: dict) -> None:
@@ -42,6 +48,12 @@ class LocalMemory:
             (f"%{query}%", limit),
         ).fetchall()
         return [json.loads(r[0]) for r in rows]
+
+    def list_kind(self, kind: str, limit: int = 100) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT body FROM memory WHERE kind = ? ORDER BY id DESC LIMIT ?", (kind, limit)
+        ).fetchall()
+        return [json.loads(row[0]) for row in rows]
 
 
 # TODO(codex): CloudMemory backed by Postgres/Supabase (+ pgvector or Chroma) implementing the

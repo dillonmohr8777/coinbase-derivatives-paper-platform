@@ -1,12 +1,12 @@
 # Core (v1). Pin exact versions at build time; these are the intended libraries.
-fastapi
-uvicorn[standard]
-pydantic>=2
-pydantic-settings
-pyyaml
-httpx
-python-dotenv
-jinja2
+fastapi==0.133.1
+uvicorn[standard]==0.41.0
+pydantic==2.13.4
+pydantic-settings==2.14.2
+pyyaml==6.0.3
+httpx==0.28.1
+python-dotenv==1.2.2
+jinja2==3.1.6
 
 # Data / trading (optional real adapters — fixtures work without them)
 # ccxt                 # crypto market data + testnet
@@ -18,7 +18,7 @@ jinja2
 # anthropic
 
 # Dev
-pytest
-ruff
-black
-mypy
+pytest==9.1.1
+ruff==0.15.22
+black==26.5.1
+mypy==2.3.0

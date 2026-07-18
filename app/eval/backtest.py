@@ -2,6 +2,7 @@
 
 No look-ahead: at each step the strategy only sees candles up to and including `i`.
 """
+
 from __future__ import annotations
 
 import sys
@@ -27,7 +28,7 @@ def run_backtest(version: str) -> None:
     pnls: list[float] = []
     entry = None
     for i in range(len(candles)):
-        window = candles[: i + 1]                       # only past+present -> no look-ahead
+        window = candles[: i + 1]  # only past+present -> no look-ahead
         for sig in strat.generate_signals(window, context={}):
             fill = broker.place_order(sig, window[-1].close)
             if sig.side is Side.BUY and entry is None:

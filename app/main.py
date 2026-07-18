@@ -4,6 +4,7 @@ This is intentionally a minimal, runnable slice (M1-ish): it loads candles for t
 watchlist, runs the active strategy, paper-fills signals, and prints a run log that mirrors the
 source video's first lines. Codex expands this into the full loop + dashboard (M2-M5).
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -36,24 +37,32 @@ def main() -> None:
 
     symbols = cfg["watchlist"]["equities"] + cfg["watchlist"]["crypto"]
     _log(f"Trade history loaded for {', '.join(symbols)}.")
-    _log(f"Mode={settings.trading_mode} | strategy={strat.version} | provider={settings.market_data_provider}")
+    _log(
+        f"Mode={settings.trading_mode} | strategy={strat.version} | provider={settings.market_data_provider}"
+    )
 
     for symbol in symbols:
         candles = provider.get_candles(symbol, cfg["timeframes"][-2], limit=200)
         prior = memory.search(symbol, limit=3)
         if prior:
             _log(f"{symbol}: recalled {len(prior)} prior lesson(s) from memory.")
-        signals = strat.generate_signals(candles, context={
-            "memory": prior,
-            "max_position_usd": cfg["risk"]["max_position_usd"],
-        })
+        signals = strat.generate_signals(
+            candles,
+            context={
+                "memory": prior,
+                "max_position_usd": cfg["risk"]["max_position_usd"],
+            },
+        )
         if not signals:
             _log(f"{symbol}: no signal (or filtered by low-volume/guardrails).")
             continue
         for sig in signals:
             try:
                 check_risk_limits(
-                    sig, candles[-1].close, open_positions=0, day_pnl=0,
+                    sig,
+                    candles[-1].close,
+                    open_positions=0,
+                    day_pnl=0,
                     max_position_usd=cfg["risk"]["max_position_usd"],
                     max_concurrent_positions=cfg["risk"]["max_concurrent_positions"],
                     daily_loss_stop_usd=cfg["risk"]["daily_loss_stop_usd"],
@@ -62,12 +71,20 @@ def main() -> None:
                 _log(f"{symbol}: order blocked by guardrail: {exc}")
                 continue
             fill = broker.place_order(sig, candles[-1].close)
-            _log(f"{strat.version.upper()} SIGNAL: {sig.side.value} {symbol} -> EXECUTING ORDER "
-                 f"(paper) @ {fill.price:.2f} fee {fill.fee:.2f}")
-            memory.write("trade", {
-                "symbol": symbol, "side": sig.side.value, "price": fill.price,
-                "strategy": sig.strategy_version, "rationale": sig.rationale,
-            })
+            _log(
+                f"{strat.version.upper()} SIGNAL: {sig.side.value} {symbol} -> EXECUTING ORDER "
+                f"(paper) @ {fill.price:.2f} fee {fill.fee:.2f}"
+            )
+            memory.write(
+                "trade",
+                {
+                    "symbol": symbol,
+                    "side": sig.side.value,
+                    "price": fill.price,
+                    "strategy": sig.strategy_version,
+                    "rationale": sig.rationale,
+                },
+            )
 
     _log("Run complete (paper).")
 

@@ -3,6 +3,7 @@
 Each function is intentionally small and unit-tested (tests/test_guardrails.py). The
 orchestrator MUST call these before any order is placed.
 """
+
 from __future__ import annotations
 
 from app.types import Candle, Signal

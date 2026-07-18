@@ -3,6 +3,7 @@
 The videos cite GPT-5.6 / Claude Fable-5 / 'Skills'. Build against the interface below so any
 tool-calling model drops in. A MockLLM ships so everything runs with no keys.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -25,6 +26,7 @@ def tool(name: str, description: str, schema: dict | None = None):
     def deco(fn: Callable[..., Any]) -> Callable[..., Any]:
         _TOOLS[name] = Tool(name=name, description=description, fn=fn, schema=schema or {})
         return fn
+
     return deco
 
 

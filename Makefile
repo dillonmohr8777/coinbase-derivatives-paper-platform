@@ -1,4 +1,4 @@
-.PHONY: install lint fmt typecheck test run dashboard backtest radar
+.PHONY: install lint fmt typecheck test run paper dashboard backtest radar
 
 install:
 	pip install -r requirements.txt
@@ -21,6 +21,9 @@ run:            ## boot orchestrator in paper mode with fixtures
 
 dashboard:      ## start the paper dashboard at http://127.0.0.1:8000
 	python -m uvicorn app.dashboard:app --host 127.0.0.1 --port 8000
+
+paper:          ## continuous paper-only derivatives loop
+	python -m app.paper_engine
 
 backtest:       ## backtest a strategy version over fixtures: make backtest STRAT=strategy_v1
 	python -m app.eval.backtest $(STRAT)

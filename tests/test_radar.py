@@ -1,4 +1,5 @@
 """Radar tests — the sample prompt must yield a ranked, cited report from fixtures."""
+
 from app.radar import FixtureDarkPool, FixtureOptionsFlow, FixtureSecFilings, Radar
 
 SAMPLE = "Find me whale trades where institutions are positioning before the move."

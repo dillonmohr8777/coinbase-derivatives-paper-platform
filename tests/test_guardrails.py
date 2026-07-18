@@ -1,4 +1,5 @@
 """Guardrail tests — 'why most bots fail'. These must stay green (spec §5)."""
+
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -32,17 +33,35 @@ def test_model_costs_applies_fees_and_slippage():
 
 def test_risk_limits_block_oversize_and_stops():
     with pytest.raises(GuardrailError):
-        check_risk_limits(_sig(size=100), price=100, open_positions=0, day_pnl=0,
-                          max_position_usd=1000, max_concurrent_positions=5,
-                          daily_loss_stop_usd=500)
+        check_risk_limits(
+            _sig(size=100),
+            price=100,
+            open_positions=0,
+            day_pnl=0,
+            max_position_usd=1000,
+            max_concurrent_positions=5,
+            daily_loss_stop_usd=500,
+        )
     with pytest.raises(GuardrailError):
-        check_risk_limits(_sig(), price=1, open_positions=5, day_pnl=0,
-                          max_position_usd=1000, max_concurrent_positions=5,
-                          daily_loss_stop_usd=500)
+        check_risk_limits(
+            _sig(),
+            price=1,
+            open_positions=5,
+            day_pnl=0,
+            max_position_usd=1000,
+            max_concurrent_positions=5,
+            daily_loss_stop_usd=500,
+        )
     with pytest.raises(GuardrailError):
-        check_risk_limits(_sig(), price=1, open_positions=0, day_pnl=-600,
-                          max_position_usd=1000, max_concurrent_positions=5,
-                          daily_loss_stop_usd=500)
+        check_risk_limits(
+            _sig(),
+            price=1,
+            open_positions=0,
+            day_pnl=-600,
+            max_position_usd=1000,
+            max_concurrent_positions=5,
+            daily_loss_stop_usd=500,
+        )
 
 
 def test_liquidity_filter_skips_low_volume():

@@ -1,4 +1,5 @@
 """CLI: run a whale-radar query. `make radar Q="Find me whale trades..."`"""
+
 from __future__ import annotations
 
 import sys
@@ -8,8 +9,10 @@ from config.settings import get_settings, load_yaml_config
 
 
 def main(argv: list[str]) -> int:
-    query = argv[1] if len(argv) > 1 else (
-        "Find me whale trades where institutions are positioning before the move."
+    query = (
+        argv[1]
+        if len(argv) > 1
+        else ("Find me whale trades where institutions are positioning before the move.")
     )
     cfg = load_yaml_config()
     get_settings()  # loads env / validates gates
